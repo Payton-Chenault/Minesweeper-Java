@@ -13,5 +13,3 @@ Find the latest installers here:
 [GitHub Actions Artifacts]((https://github.com/Payton-Chenault/Minesweeper-Java/actions))
 
 ---
-
-**Note:** Replace `<your-username>` and `<your-repo>` with your actual GitHub username and repository name.

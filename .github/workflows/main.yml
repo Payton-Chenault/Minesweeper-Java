@@ -3,7 +3,7 @@ name: Build Installers
 on:
   push:
     tags:
-      - 'v*'  # Triggers on version tags like v1.0
+      - 'v*'
 
 jobs:
   linux-build:

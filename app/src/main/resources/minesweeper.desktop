@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Minesweeper
+Comment=Classic Minesweeper game
+Exec=/usr/local/bin/minesweeper
+Icon=/usr/share/icons/hicolor/48x48/apps/minesweeper.png
+Terminal=false
+Categories=Game;LogicGame;

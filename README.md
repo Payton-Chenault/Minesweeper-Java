@@ -10,6 +10,6 @@ Download the latest installers for your platform from the GitHub Actions artifac
   - `.msi` — Windows installer with Start Menu shortcut  
 
 Find the latest installers here:  
-[GitHub Actions Artifacts]((https://github.com/Payton-Chenault/Minesweeper-Java/actions))
+[GitHub Actions Artifacts](https://github.com/Payton-Chenault/Minesweeper-Java/actions)
 
 ---

@@ -1,0 +1,101 @@
+name: Build Minesweeper Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Grant Gradle permission
+        run: chmod +x ./gradlew
+
+      - name: Build project
+        run: ./gradlew clean build
+
+      - name: Install jpackage dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y fakeroot libfuse2
+
+      - name: Create installers with jpackage
+        run: |
+          mkdir -p output
+
+          jpackage --type app-image \
+            --name "Minesweeper" \
+            --input app/build/libs \
+            --main-jar app.jar \
+            --main-class minesweeper.java.App \
+            --icon app/src/main/resources/icon/technology.png \
+            --dest output \
+            --app-version 1.0 \
+            --java-options "--enable-preview"
+
+          jpackage --type deb \
+            --name "Minesweeper" \
+            --input app/build/libs \
+            --main-jar app.jar \
+            --main-class minesweeper.java.App \
+            --icon app/src/main/resources/icon/technology.png \
+            --dest output \
+            --app-version 1.0 \
+            --java-options "--enable-preview"
+
+      - name: Upload Linux Installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-installers
+          path: output
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Grant Gradle permission
+        run: chmod +x ./gradlew
+
+      - name: Build project
+        run: ./gradlew clean build
+
+      - name: Create Windows MSI with jpackage
+        run: |
+          mkdir output
+
+          jpackage --type msi ^
+            --name "Minesweeper" ^
+            --input app\build\libs ^
+            --main-jar app.jar ^
+            --main-class minesweeper.java.App ^
+            --icon app\src\main\resources\icon\technology.png ^
+            --dest output ^
+            --app-version 1.0 ^
+            --java-options "--enable-preview"
+
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: output

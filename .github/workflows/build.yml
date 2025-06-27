@@ -75,7 +75,9 @@ jobs:
           java-version: 21
 
       - name: Grant Gradle permission
-        run: icacls . /grant Everyone:(F) /T /C
+        shell: pwsh
+        run: icacls . /grant Everyone:"(F)" /T /C
+
 
       - name: Build project
         run: ./gradlew clean build

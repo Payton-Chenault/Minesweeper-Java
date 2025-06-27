@@ -316,6 +316,7 @@ public class App extends JFrame {
         gameTimer.stop();
         newGameButton.setText("😡");
         JOptionPane.showMessageDialog(this, "You Lose!", "Failure!", JOptionPane.INFORMATION_MESSAGE);
+        restartGame();
     }
 
     private void winGame() {
@@ -328,6 +329,7 @@ public class App extends JFrame {
 
         newGameButton.setText("😎");
         JOptionPane.showMessageDialog(this, "You Win!", "Victory", JOptionPane.INFORMATION_MESSAGE);
+        restartGame();
     }
 
     private enum Difficulty {
@@ -340,3 +342,4 @@ public class App extends JFrame {
         SwingUtilities.invokeLater(App::new);
     }
 }
+

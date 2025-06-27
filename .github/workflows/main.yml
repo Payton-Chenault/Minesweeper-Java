@@ -1,0 +1,53 @@
+name: Build and Package Minesweeper
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build with Gradle
+        run: ./gradlew clean build
+
+      - name: Prepare packaging folder
+        run: |
+          mkdir -p package/usr/share/applications
+          mkdir -p package/usr/share/icons/hicolor/48x48/apps
+          cp resources/minesweeper.desktop package/usr/share/applications/
+          cp resources/icon.png package/usr/share/icons/hicolor/48x48/apps/minesweeper.png
+
+      - name: Create Debian package with jpackage
+        run: |
+          jpackage \
+            --type deb \
+            --input build/libs \
+            --name Minesweeper \
+            --main-jar app.jar \
+            --main-class minesweeper.java.App \
+            --icon resources/icon.png \
+            --app-version 1.0 \
+            --dest output \
+            --linux-shortcut \
+            --linux-menu-group Games \
+            --vendor "Payton Chenault" \
+            --verbose
+
+      - name: Upload Debian package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: minesweeper-deb
+          path: output/*.deb

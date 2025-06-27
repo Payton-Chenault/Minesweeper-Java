@@ -76,7 +76,8 @@ jobs:
 
       - name: Grant Gradle permission
         shell: pwsh
-        run: icacls . /grant Everyone:"(F)" /T /C
+        run: icacls . /grant Everyone:`(F`) /T /C
+
 
 
       - name: Build project

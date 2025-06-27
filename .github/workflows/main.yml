@@ -1,29 +1,30 @@
-name: Build Minesweeper Installer
+name: Build Installers
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0
 
 jobs:
-  build:
+  linux-build:
     runs-on: ubuntu-latest
-
+    name: Build DEB and AppImage on Linux
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
 
-      - name: Build with Gradle
+      - name: Grant execute permissions
+        run: chmod +x gradlew
+
+      - name: Build project
         run: ./gradlew clean build
 
-      - name: Create app image using jpackage
+      - name: Package AppImage
         run: |
           jpackage \
             --type app-image \
@@ -32,10 +33,10 @@ jobs:
             --main-jar app.jar \
             --main-class minesweeper.java.App \
             --icon app/src/main/resources/icon/technology.png \
-            --dest output \
-            --app-version 1.0
+            --app-version "${GITHUB_REF_NAME}" \
+            --dest dist/linux
 
-      - name: Create Debian installer using jpackage
+      - name: Create DEB Package
         run: |
           jpackage \
             --type deb \
@@ -44,20 +45,63 @@ jobs:
             --main-jar app.jar \
             --main-class minesweeper.java.App \
             --icon app/src/main/resources/icon/technology.png \
-            --dest output \
-            --app-version 1.0 \
-            --linux-shortcut \
-            --linux-menu-group "Games" \
-            --linux-package-name minesweeper
+            --app-version "${GITHUB_REF_NAME}" \
+            --dest dist/linux
 
-      - name: Upload Debian package artifact
+      - name: Upload Linux installers
         uses: actions/upload-artifact@v4
         with:
-          name: minesweeper-deb
-          path: output/*.deb
+          name: Minesweeper-Linux
+          path: dist/linux
 
-      - name: Upload app image artifact
+  windows-build:
+    runs-on: windows-latest
+    name: Build MSI Installer on Windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Grant execute permissions
+        run: ./gradlew.bat clean build
+
+      - name: Package MSI
+        run: |
+          jpackage ^
+            --type msi ^
+            --name Minesweeper ^
+            --input app\build\libs ^
+            --main-jar app.jar ^
+            --main-class minesweeper.java.App ^
+            --icon app\src\main\resources\icon\technology.ico ^
+            --app-version %GITHUB_REF_NAME% ^
+            --dest dist\windows
+
+      - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
-          name: minesweeper-app-image
-          path: output/Minesweeper
+          name: Minesweeper-Windows
+          path: dist/windows
+
+  release:
+    name: Create GitHub Release
+    needs: [linux-build, windows-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all installers
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

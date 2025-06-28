@@ -3,6 +3,11 @@
  */
 package minesweeper.java;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -48,9 +53,58 @@ public class App extends JFrame {
     private JLabel timerLabel;
     private JLabel minesLeftLabel;
     private Timer gameTimer;
+    private Clip click;
+    private Clip lose;
+    private Clip ng;
+    private Clip flagClick;
+    private Clip winNoise;
 
 
     public App() {
+        try(InputStream is = getClass().getResourceAsStream("/audio/bomb_click.wav")) {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
+            lose = AudioSystem.getClip();
+            lose.open(ais);
+        }
+        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
+        try(InputStream is = getClass().getResourceAsStream("/audio/win_noise.wav")) {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
+            winNoise = AudioSystem.getClip();
+            winNoise.open(ais);
+        }
+        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
+
+        try(InputStream is = getClass().getResourceAsStream("/audio/click.wav")) {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
+            click = AudioSystem.getClip();
+            click.open(ais);
+        }
+        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
+        try(InputStream is = getClass().getResourceAsStream("/audio/new_game_click.wav")) {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
+            ng = AudioSystem.getClip();
+            ng.open(ais);
+        }
+        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+        try(InputStream is = getClass().getResourceAsStream("/audio/flag_click.wav")) {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
+            flagClick = AudioSystem.getClip();
+            flagClick.open(ais);
+        }
+        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
         try (InputStream is = getClass().getResourceAsStream("/fonts/Bytesized-Regular.ttf")) {
             buttonFont = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(Font.PLAIN, FONT_SIZE);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(buttonFont);
@@ -104,6 +158,7 @@ public class App extends JFrame {
     }
 
     private void restartGame() {
+        playAudio(ng);
         gameTimer.stop();
         dispose();
         new App();
@@ -173,9 +228,12 @@ public class App extends JFrame {
         );
 
         JDialog difficultyDialog = oPane.createDialog(this, "Difficulty");
-        difficultyDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         difficultyDialog.setVisible(true);
         
+        if(oPane.getValue() == null) {
+            System.exit(0);
+        }
+
         difficulty = switch (oPane.getValue().toString()) {
             case "EASY" -> Difficulty.EASY;
             case "MEDIUM" -> Difficulty.MEDIUM;
@@ -207,6 +265,7 @@ public class App extends JFrame {
     private void reveal(int x, int y) {
         if(flagged[x][y] || revealed[x][y]) return;
 
+        playAudio(click);
         if(firstClick) {
             initMines(x, y);
             firstClick = false;
@@ -230,36 +289,37 @@ public class App extends JFrame {
         }
 
         revealedButton.setEnabled(false);
+        revealedButton.setBackground(Color.getHSBColor(293f / 360f, 0.22f, 1f));
         if (field[x][y] > 0) {
             String value = String.valueOf(field[x][y]);
             revealedButton.setText(value);
             switch (field[x][y]) {
                 case 1:
-                    revealedButton.setBackground(Color.getHSBColor(195f / 350f, 1f, 1f));
+                    revealedButton.setBackground(Color.getHSBColor(195f / 350f, 0.5f, 1f));
                     break;
                 case 2:
-                    revealedButton.setBackground(Color.getHSBColor(29f / 360f, 1f, 1f));
+                    revealedButton.setBackground(Color.getHSBColor(29f / 360f, 0.5f, 1f));
                     break;
                 case 3:
-                    revealedButton.setBackground(Color.getHSBColor(0f / 360f, 1f, 1f));
+                    revealedButton.setBackground(Color.getHSBColor(0f / 360f, 0.5f, 1f));
                     break;
                 case 4:
-                    revealedButton.setBackground(Color.getHSBColor(125f / 360f, 1f, 1f));
+                    revealedButton.setBackground(Color.getHSBColor(125f / 360f, 0.5f, 1f));
                     break;
                 case 5:
-                    revealedButton.setBackground(Color.getHSBColor(166f / 360f, 1f, 1f));
+                    revealedButton.setBackground(Color.getHSBColor(166f / 360f, 0.5f, 1f));
                     break;
                 case 6:
-                    revealedButton.setBackground(Color.getHSBColor(202f / 360f, 1f, 1f));
+                    revealedButton.setBackground(Color.getHSBColor(202f / 360f, 0.5f, 1f));
                     break;
                 case 7:
-                    revealedButton.setBackground(Color.getHSBColor(268f / 360f, 1f, 1f));
+                    revealedButton.setBackground(Color.getHSBColor(268f / 360f, 0.5f, 1f));
                     break;
                 case 8:
-                    revealedButton.setBackground(Color.getHSBColor(310f / 360f, 1f, 1f));
+                    revealedButton.setBackground(Color.getHSBColor(310f / 360f, 0.5f, 1f));
                     break;
                 default:
-                    revealedButton.setBackground(Color.getHSBColor(240f / 360f, 1f, 0f));
+                    revealedButton.setBackground(Color.getHSBColor(240f / 360f, 0.5f, 0f));
                     break;
             }
         } else {
@@ -278,7 +338,8 @@ public class App extends JFrame {
     void toggleFlag(int x, int y) {
         if(revealed[x][y]) return;
     
-        
+
+        playAudio(flagClick);
         flagged[x][y] = !flagged[x][y];
 
         if(flagged[x][y] && numFlags == 0) {
@@ -304,6 +365,7 @@ public class App extends JFrame {
     }
 
     private void gameOver() {
+        playAudio(lose);
         for(int x = 0; x < size; x++) {
             for(int y = 0; y< size; y++) {
                 if(field[x][y] == -1) {
@@ -320,6 +382,7 @@ public class App extends JFrame {
     }
 
     private void winGame() {
+        playAudio(winNoise);
         gameTimer.stop();
         for(int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -330,6 +393,17 @@ public class App extends JFrame {
         newGameButton.setText("😎");
         JOptionPane.showMessageDialog(this, "You Win!", "Victory", JOptionPane.INFORMATION_MESSAGE);
         restartGame();
+    }
+
+    private void playAudio(Clip audio) {
+        if(audio.isRunning()) {
+            audio.stop();
+            audio.setFramePosition(0);
+            audio.start();
+        } else {
+            audio.setFramePosition(0);
+            audio.start();
+        }
     }
 
     private enum Difficulty {

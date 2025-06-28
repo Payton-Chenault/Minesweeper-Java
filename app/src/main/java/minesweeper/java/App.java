@@ -3,11 +3,6 @@
  */
 package minesweeper.java;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -21,9 +16,14 @@ import javax.swing.UIManager;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -31,9 +31,13 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 public class App extends JFrame {
+    private static final Logger logger = Logger.getLogger(App.class.getName());
     private static final int SIZE_FACTOR = 50;
     private static final int EMOJI_FONT_SIZE = 10;
     private static final int FONT_SIZE = 15;
+    private static final int EASY_MINES = 10, EASY_SIZE = 10;
+    private static final int MEDIUM_MINES = 20, MEDIUM_SIZE = 15;
+    private static final int HARD_MINES = 40, HARD_SIZE = 20;
     private JPanel gamePanel;
     private JPanel gameInfoPanel;
     private int size;
@@ -54,14 +58,33 @@ public class App extends JFrame {
     private JLabel minesLeftLabel;
     private Timer gameTimer;
     private SoundMan soundManager;
+    
+    static {
+        try {
 
+            File logDir = new File("logs");
+            if(!logDir.exists()) {
+                logDir.mkdirs();
+            }
+
+            FileHandler handler = new FileHandler("logs/applog.log", true);
+            handler.setFormatter(new SimpleFormatter());
+            logger.addHandler(handler);
+            logger.setUseParentHandlers(false);
+            logger.setLevel(Level.ALL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public App() {
+        
         try (InputStream is = getClass().getResourceAsStream("/fonts/Bytesized-Regular.ttf")) {
             buttonFont = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(Font.PLAIN, FONT_SIZE);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(buttonFont);
         }
         catch (IOException | FontFormatException e) {
+            logger.log(Level.WARNING, "Utilizing Fallback Font", e);
             buttonFont = new Font("SansSerif", Font.PLAIN, FONT_SIZE);
         }
 
@@ -118,9 +141,12 @@ public class App extends JFrame {
     private void restartGame() {
         soundManager.play(Audios.NEW_GAME);
         gameTimer.stop();
-        dispose();
-        soundManager.closeAll();
-        new App();
+        gamePanel.removeAll();
+        gameInfoPanel.removeAll();
+        getContentPane().removeAll();
+        initGame();
+        revalidate();
+        repaint();
     }
 
     private void initButtons() {
@@ -206,11 +232,11 @@ public class App extends JFrame {
         }
 
         switch(difficulty) {
-            case EASY -> { size = 10; numMines = 10;}
+            case EASY -> { size = EASY_SIZE; numMines = EASY_MINES;}
  
-            case MEDIUM -> { size = 15; numMines = 20;}
+            case MEDIUM -> { size = MEDIUM_SIZE; numMines = MEDIUM_MINES;}
 
-            case HARD -> {size = 20; numMines = 40;}
+            case HARD -> {size = HARD_SIZE; numMines = HARD_MINES;}
         }
 
         numFlags = numMines;

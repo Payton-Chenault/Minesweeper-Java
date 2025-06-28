@@ -191,7 +191,6 @@ public class App extends JFrame {
 
     private void initDifficulty() {
         firstClick = true;
-
         JOptionPane oPane = 
         new JOptionPane(
             "Choose a difficulty",
@@ -204,6 +203,7 @@ public class App extends JFrame {
 
         JDialog difficultyDialog = oPane.createDialog(this, "Difficulty");
         difficultyDialog.setVisible(true);
+        difficultyDialog.setAlwaysOnTop(true);
         
         Object selectedDifficulty = oPane.getValue();
 

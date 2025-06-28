@@ -9,6 +9,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -48,6 +49,7 @@ public class App extends JFrame {
     private boolean[][] revealed;
     private boolean[][] flagged;
     private boolean firstClick;
+    private boolean debugEnabled;
     private Difficulty difficulty;
     private Font buttonFont;
     private JLabel timerLabel;
@@ -190,6 +192,7 @@ public class App extends JFrame {
 
     private void initDifficulty() {
         firstClick = true;
+
         JOptionPane oPane = 
         new JOptionPane(
             "Choose a difficulty",
@@ -203,9 +206,9 @@ public class App extends JFrame {
         JDialog difficultyDialog = oPane.createDialog(this, "Difficulty");
         difficultyDialog.setVisible(true);
         
-        if(oPane.getValue() == null) {
-            System.exit(0);
-        }
+        Object selectedDifficulty = oPane.getValue();
+
+        if(selectedDifficulty == null) System.exit(0);
 
         difficulty = switch (oPane.getValue().toString()) {
             case "EASY" -> Difficulty.EASY;
@@ -213,23 +216,17 @@ public class App extends JFrame {
             case "HARD" -> Difficulty.HARD;
             default -> null;
         };
+
         if (difficulty == null) {
             throw new NullPointerException("Difficulty was NULL after request");
         }
 
         switch(difficulty) {
-            case EASY:
-                size = 10;
-                numMines = 10;
-                break;
-            case MEDIUM:
-                size = 15;
-                numMines = 20;
-                break;
-            case HARD:
-                size = 20;
-                numMines = 40;
-                break;
+            case EASY -> { size = 10; numMines = 10;}
+ 
+            case MEDIUM -> { size = 15; numMines = 20;}
+
+            case HARD -> {size = 20; numMines = 40;}
         }
 
         numFlags = numMines;

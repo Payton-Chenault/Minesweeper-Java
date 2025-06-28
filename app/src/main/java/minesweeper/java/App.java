@@ -9,7 +9,6 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -54,11 +53,7 @@ public class App extends JFrame {
     private JLabel timerLabel;
     private JLabel minesLeftLabel;
     private Timer gameTimer;
-    private Clip click;
-    private Clip lose;
-    private Clip newGameClip;
-    private Clip flagClick;
-    private Clip winNoise;
+    private SoundMan soundManager;
 
 
     public App() {
@@ -74,26 +69,15 @@ public class App extends JFrame {
         UIManager.put("Button.foreground", Color.BLACK);
         UIManager.put("Button.disabledText", Color.BLACK);
 
-        click = loadAudio("/audio/click.wav");
-        lose = loadAudio("/audio/bombclick.wav");
-        newGameClip = loadAudio("/audio/newgameclick.wav");
-        flagClick = loadAudio("/audio/flagclick.wav");
-        winNoise = loadAudio("/audio/winnoise.wav");
+        soundManager = new SoundMan();
+        soundManager.load(Audios.CLICK, "/audio/click.wav");
+        soundManager.load(Audios.FLAG, "/audio/flagclick.wav");
+        soundManager.load(Audios.LOSE, "/audio/bombclick.wav");
+        soundManager.load(Audios.NEW_GAME, "/audio/newgameclick.wav");
+        soundManager.load(Audios.WIN, "/audio/winnoise.wav");
         setTitle("Mine Sweeper");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         initGame();
-    }
-
-    private Clip loadAudio(String resourcePath) {
-        try(InputStream is = getClass().getResourceAsStream(resourcePath)) {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(is);    
-            Clip clip = AudioSystem.getClip();
-            clip.open(ais);
-            return clip;
-        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private void initGame() {
@@ -132,9 +116,10 @@ public class App extends JFrame {
     }
 
     private void restartGame() {
-        playAudio(newGameClip);
+        soundManager.play(Audios.NEW_GAME);
         gameTimer.stop();
         dispose();
+        soundManager.closeAll();
         new App();
     }
 
@@ -234,7 +219,7 @@ public class App extends JFrame {
     private void reveal(int x, int y) {
         if(flagged[x][y] || revealed[x][y]) return;
 
-        playAudio(click);
+        soundManager.play(Audios.CLICK);
         if(firstClick) {
             initMines(x, y);
             firstClick = false;
@@ -308,7 +293,7 @@ public class App extends JFrame {
         if(revealed[x][y]) return;
     
 
-        playAudio(flagClick);
+        soundManager.play(Audios.FLAG);
         flagged[x][y] = !flagged[x][y];
 
         if(flagged[x][y] && numFlags == 0) {
@@ -334,7 +319,7 @@ public class App extends JFrame {
     }
 
     private void gameOver() {
-        playAudio(lose);
+        soundManager.play(Audios.LOSE);
         for(int x = 0; x < size; x++) {
             for(int y = 0; y< size; y++) {
                 if(field[x][y] == -1) {
@@ -351,7 +336,7 @@ public class App extends JFrame {
     }
 
     private void winGame() {
-        playAudio(winNoise);
+        soundManager.play(Audios.WIN);
         gameTimer.stop();
         for(int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -364,21 +349,18 @@ public class App extends JFrame {
         restartGame();
     }
 
-    private void playAudio(Clip audio) {
-        if(audio.isRunning()) {
-            audio.stop();
-            audio.setFramePosition(0);
-            audio.start();
-        } else {
-            audio.setFramePosition(0);
-            audio.start();
-        }
-    }
-
-    private enum Difficulty {
+    enum Difficulty {
         EASY,
         MEDIUM,
         HARD
+    }
+
+    enum Audios {
+        WIN,
+        LOSE,
+        CLICK,
+        FLAG,
+        NEW_GAME
     }
 
     public static void main(String[] args) {

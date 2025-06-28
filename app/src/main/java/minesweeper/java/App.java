@@ -75,9 +75,9 @@ public class App extends JFrame {
 
         click = loadAudio("/audio/click.wav");
         lose = loadAudio("/audio/bombclick.wav");
-        newGameClip = loadAudio("/audio/newgameclick");
-        flagClick = loadAudio("/audio/flagclick");
-        winNoise = loadAudio("/audio/winnoise");
+        newGameClip = loadAudio("/audio/newgameclick.wav");
+        flagClick = loadAudio("/audio/flagclick.wav");
+        winNoise = loadAudio("/audio/winnoise.wav");
         setTitle("Mine Sweeper");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         initGame();

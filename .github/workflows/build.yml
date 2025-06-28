@@ -42,7 +42,7 @@ jobs:
             --main-class minesweeper.java.App \
             --icon app/src/main/resources/icon/technology.png \
             --dest output \
-            --app-version 1.0 \
+            --app-version 1.2 \
             --java-options "--enable-preview"
 
           jpackage --type deb \
@@ -52,7 +52,7 @@ jobs:
             --main-class minesweeper.java.App \
             --icon app/src/main/resources/icon/technology.png \
             --dest output \
-            --app-version 1.0 \
+            --app-version 1.2 \
             --java-options "--enable-preview"
 
       - name: Upload Linux Installers
@@ -95,7 +95,7 @@ jobs:
             --main-class minesweeper.java.App `
             --icon app\src\main\resources\icon\technology.ico `
             --dest output `
-            --app-version 1.0 `
+            --app-version 1.2 `
             --win-menu `
             --win-shortcut `
             --java-options "--enable-preview"

@@ -49,7 +49,6 @@ public class App extends JFrame {
     private boolean[][] revealed;
     private boolean[][] flagged;
     private boolean firstClick;
-    private boolean debugEnabled;
     private Difficulty difficulty;
     private Font buttonFont;
     private JLabel timerLabel;

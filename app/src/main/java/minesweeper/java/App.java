@@ -125,11 +125,11 @@ public class App extends JFrame {
             for (int y = 0; y < size; y++) {
                 JButton btn = new JButton();
                 btn.setFont(buttonFont);
-                int fx = x, fy = y;
+                Cords fcords = new Cords(x, y);
                 btn.addMouseListener(new MouseAdapter() {
                     public void mouseClicked(MouseEvent e) {
-                        if (SwingUtilities.isRightMouseButton(e)) handleFlag(fx, fy);
-                        else if (SwingUtilities.isLeftMouseButton(e)) handleReveal(fx, fy);
+                        if (SwingUtilities.isRightMouseButton(e)) handleFlag(fcords);
+                        else if (SwingUtilities.isLeftMouseButton(e)) handleReveal(fcords);
                     }
                 });
                 gameButtons[x][y] = btn;
@@ -138,38 +138,38 @@ public class App extends JFrame {
         }
     }
 
-    private void handleReveal(int x, int y) {
-        if (!game.reveal(x, y)) return;
+    private void handleReveal(Cords cords) {
+        if (!game.reveal(cords)) return;
         soundManager.play(Audios.CLICK);
 
-        if (game.isMine(x, y)) {
-            showMine(x, y);
+        if (game.isMine(cords)) {
+            showMine(cords);
             gameOver();
             return;
         }
 
-        updateButton(x, y);
+        updateButton(cords);
 
         if (game.hasWon()) winGame();
-        else if (game.getCell(x, y) == 0) {
+        else if (game.getCell(cords) == 0) {
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
-                    int nx = x + dx, ny = y + dy;
+                    int nx = cords.x() + dx, ny = cords.y() + dy;
                     if (nx >= 0 && ny >= 0 && nx < game.getSize() && ny < game.getSize()) {
-                        handleReveal(nx, ny);
+                        handleReveal(new Cords(nx, ny));
                     }
                 }
             }
         }
     }
 
-    private void handleFlag(int x, int y) {
-        if (game.isRevealed(x, y)) return;
+    private void handleFlag(Cords cords) {
+        if (game.isRevealed(cords)) return;
         soundManager.play(Audios.FLAG);
-        game.toggleFlag(x, y);
+        game.toggleFlag(cords);
 
-        JButton btn = gameButtons[x][y];
-        if (game.isFlagged(x, y)) {
+        JButton btn = gameButtons[cords.x()][cords.y()];
+        if (game.isFlagged(cords)) {
             btn.setText("F");
             btn.setForeground(Color.RED);
         } else {
@@ -179,10 +179,10 @@ public class App extends JFrame {
         minesLeftLabel.setText(String.valueOf(difficulty.mines - game.getFlagsPlaced()));
     }
 
-    private void updateButton(int x, int y) {
-        JButton btn = gameButtons[x][y];
+    private void updateButton(Cords cords) {
+        JButton btn = gameButtons[cords.x()][cords.y()];
         btn.setEnabled(false);
-        int value = game.getCell(x, y);
+        int value = game.getCell(cords);
         if (value > 0) {
             btn.setText(String.valueOf(value));
         } else {
@@ -223,11 +223,11 @@ public class App extends JFrame {
         }
     }
 
-    private void showMine(int x, int y) {
+    private void showMine(Cords cords) {
         for (int i = 0; i < game.getSize(); i++) {
             for (int j = 0; j < game.getSize(); j++) {
                 JButton btn = gameButtons[i][j];
-                if (game.isMine(i, j)) {
+                if (game.isMine(new Cords(i, j))) {
                     btn.setText("💣");
                     btn.setFont(new Font("SansSerif", Font.PLAIN, EMOJI_FONT_SIZE));
                 }

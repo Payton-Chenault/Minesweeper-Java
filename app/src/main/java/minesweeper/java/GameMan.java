@@ -23,34 +23,34 @@ public class GameMan {
     }
 
     public int getSize() { return this.size; }
-    public boolean isMine(int x, int y) { return this.field[x][y] == MINE; }
-    public int getCell(int x, int y) { return this.field[x][y]; }
+    public boolean isMine(Cords cords) { return this.field[cords.x()][cords.y()] == MINE; }
+    public int getCell(Cords cords) { return this.field[cords.x()][cords.y()]; }
     public int getFlagsPlaced() { return this.flagsPlaced; }
-    public boolean isRevealed(int x, int y) {return this.revealed[x][y]; }
-    public boolean isFlagged(int x, int y) {return this.flagged[x][y]; }
+    public boolean isRevealed(Cords cords) {return this.revealed[cords.x()][cords.y()]; }
+    public boolean isFlagged(Cords cords) {return this.flagged[cords.x()][cords.y()]; }
     public boolean[][] getRevealed() { return this.revealed; }
     public boolean[][] getFlagged() { return this.flagged; }
 
-    public void toggleFlag(int x, int y) {
-        if(revealed[x][y]) return;
+    public void toggleFlag(Cords cords) {
+        if(revealed[cords.x()][cords.y()]) return;
 
-        flagged[x][y] = !flagged[x][y];
-        if(flagged[x][y]) {
+        flagged[cords.x()][cords.y()] = !flagged[cords.x()][cords.y()];
+        if(flagged[cords.x()][cords.y()]) {
             this.flagsPlaced++;
         } else {
             this.flagsPlaced--;
         }
     }
 
-    public boolean reveal(int x, int y) {
-        if(this.flagged[x][y] || this.revealed[x][y]) return false;
+    public boolean reveal(Cords cords) {
+        if(this.flagged[cords.x()][cords.y()] || this.revealed[cords.x()][cords.y()]) return false;
 
         if(this.firstClick) {
-            generateField(x, y);
+            generateField(cords);
             this.firstClick = false;
         }
 
-        this.revealed[x][y] = true;
+        this.revealed[cords.x()][cords.y()] = true;
         this.revealedCount++;
         return true;
     }
@@ -59,7 +59,7 @@ public class GameMan {
         return this.revealedCount == (size * size - numMines);
     }
 
-    private void generateField(int sx, int sy) {
+    private void generateField(Cords safeCords) {
         Random rand = new Random();
         int placed = 0;
 
@@ -68,7 +68,7 @@ public class GameMan {
             int y = rand.nextInt(this.size);
 
             if (field[x][y] == MINE) continue;
-            if (Math.abs(x - sx) <= 1 && Math.abs(y - sy) <= 1) continue;
+            if (Math.abs(x - safeCords.x()) <= 1 && Math.abs(y - safeCords.y()) <= 1) continue;
 
             this.field[x][y] = MINE;
             placed++;

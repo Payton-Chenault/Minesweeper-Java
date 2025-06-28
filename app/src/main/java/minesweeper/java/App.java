@@ -55,56 +55,12 @@ public class App extends JFrame {
     private Timer gameTimer;
     private Clip click;
     private Clip lose;
-    private Clip ng;
+    private Clip newGameClip;
     private Clip flagClick;
     private Clip winNoise;
 
 
     public App() {
-        try(InputStream is = getClass().getResourceAsStream("/audio/bomb_click.wav")) {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
-            lose = AudioSystem.getClip();
-            lose.open(ais);
-        }
-        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
-
-        try(InputStream is = getClass().getResourceAsStream("/audio/win_noise.wav")) {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
-            winNoise = AudioSystem.getClip();
-            winNoise.open(ais);
-        }
-        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
-
-
-        try(InputStream is = getClass().getResourceAsStream("/audio/click.wav")) {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
-            click = AudioSystem.getClip();
-            click.open(ais);
-        }
-        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
-
-        try(InputStream is = getClass().getResourceAsStream("/audio/new_game_click.wav")) {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
-            ng = AudioSystem.getClip();
-            ng.open(ais);
-        }
-        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
-        try(InputStream is = getClass().getResourceAsStream("/audio/flag_click.wav")) {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
-            flagClick = AudioSystem.getClip();
-            flagClick.open(ais);
-        }
-        catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
         try (InputStream is = getClass().getResourceAsStream("/fonts/Bytesized-Regular.ttf")) {
             buttonFont = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(Font.PLAIN, FONT_SIZE);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(buttonFont);
@@ -117,9 +73,26 @@ public class App extends JFrame {
         UIManager.put("Button.foreground", Color.BLACK);
         UIManager.put("Button.disabledText", Color.BLACK);
 
+        click = loadAudio("/audio/click.wav");
+        lose = loadAudio("/audio/bombclick.wav");
+        newGameClip = loadAudio("/audio/newgameclick");
+        flagClick = loadAudio("/audio/flagclick");
+        winNoise = loadAudio("/audio/winnoise");
         setTitle("Mine Sweeper");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         initGame();
+    }
+
+    private Clip loadAudio(String resourcePath) {
+        try(InputStream is = getClass().getResourceAsStream(resourcePath)) {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(is);    
+            Clip clip = AudioSystem.getClip();
+            clip.open(ais);
+            return clip;
+        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void initGame() {
@@ -158,7 +131,7 @@ public class App extends JFrame {
     }
 
     private void restartGame() {
-        playAudio(ng);
+        playAudio(newGameClip);
         gameTimer.stop();
         dispose();
         new App();
